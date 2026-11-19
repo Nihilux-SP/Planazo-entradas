@@ -60,11 +60,22 @@ Cloud Run con facturación por petición incluye cada mes 2 M peticiones, 180.00
 
 ## 5. Recomendación
 
-Para **esta entrega académica**, Render es la mejor opción: coste **0 $** con el plan Hobby, despliegue automático desde el repositorio de actividades y HTTPS sin configuración. El blueprint `render.yaml` queda en el repositorio para reproducirlo.
+Para **esta entrega académica**, Render es la mejor opción: coste **0 $** con el plan Hobby, despliegue desde el repositorio de la aplicación (`Nihilux-SP/Planazo-entradas`) y HTTPS sin configuración. El blueprint `render.yaml` queda en el repositorio para reproducirlo.
 
 Si el proyecto continuara y el tráfico creciera, la siguiente opción más eficiente económicamente sería **Cloud Run** (paga por petición y escala a cero), seguida de Render con plan de 7 $ más disco. AWS y Azure resultan recomendables solo cuando se necesiten servicios enterprise (VPC avanzada, cumplimiento específico, integración con directorio corporativo), ya que su coste mínimo es superior y exige más trabajo de operación.
 
-## 6. Fuentes
+## 6. Presupuesto de la entrega
+
+| Concepto | Cantidad | Coste mensual | Coste anual |
+|---|---|---:|---:|
+| Web Service Hobby en Render (Docker, 512 MB) | 1 servicio | **0 $** | **0 $** |
+| HTTPS, dominio `onrender.com` y despliegue desde Git | Incluido | 0 $ | 0 $ |
+| Disco persistente de 1 GB (opcional) | 1 disco | 0,25 $ | 3 $ |
+| Postgres gestionado (opcional, si se migrara de H2) | 1 instancia | 6-19 $ | 72-228 $ |
+
+**Presupuesto aprobado: 0 $/mes** con la configuración actual (H2 efímero en el plan Hobby). La única mejora recomendable para conservar usuarios y reservas entre reinicios costaría **0,25 $/mes (3 $/año)** mediante un disco persistente montado en `/app/data`.
+
+## 7. Fuentes
 
 - Render — Pricing: https://render.com/pricing (consultado 19-11-2026)
 - Render — Persistent disks: https://render.com/docs/disks (consultado 19-11-2026)
