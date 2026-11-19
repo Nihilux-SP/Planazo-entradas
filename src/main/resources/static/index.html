@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Planazo — encuentra y reserva entradas para conciertos, teatro y cine en Madrid, Barcelona y Valencia.">
+  <meta name="theme-color" content="#ff7657">
+  <title>Planazo · Tus planes, en un solo sitio</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23ff7657'/%3E%3Ctext x='50' y='72' font-size='70' text-anchor='middle' fill='white'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+
+  <header class="site-header" id="site-header">
+    <a class="brand" href="#inicio" aria-label="Planazo, ir al inicio"><span class="brand-mark">✦</span> planazo</a>
+    <nav class="desktop-nav" aria-label="Navegación principal">
+      <a href="#explorar">Explorar</a>
+      <a href="#favoritos" id="nav-favorites" hidden>Favoritos</a>
+      <a href="#reservas" id="nav-bookings" hidden>Mis reservas</a>
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="#admin" id="nav-admin" hidden>Administración</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-button" id="theme-toggle" type="button" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+      <button class="icon-button" id="fav-shortcut" type="button" aria-label="Ver favoritos" title="Favoritos">♡<span class="badge" id="fav-count">0</span></button>
+      <div id="session-area">
+        <button class="btn btn-primary btn-sm" id="open-auth" type="button">Iniciar sesión</button>
+      </div>
+      <button class="icon-button menu-button" id="menu-button" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button>
+    </div>
+  </header>
+
+  <nav class="mobile-nav" id="mobile-nav" aria-label="Navegación móvil">
+    <a href="#explorar">Explorar</a>
+    <a href="#favoritos" id="mobile-favorites" hidden>Favoritos</a>
+    <a href="#reservas" id="mobile-bookings" hidden>Mis reservas</a>
+    <a href="#como-funciona">Cómo funciona</a>
+    <a href="#admin" id="mobile-admin" hidden>Administración</a>
+    <a href="#ayuda">Ayuda</a>
+  </nav>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="pulse"></span> Vive el momento</p>
+        <h1>Tu próximo<br><em>planazo</em> empieza aquí.</h1>
+        <p class="hero-text">Encuentra entradas para conciertos, teatro y cine. Sin complicaciones, con toda la emoción y en tu ciudad.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#explorar">Explorar eventos <span>↗</span></a>
+          <button class="btn btn-outline" id="hero-github" type="button">Entrar con GitHub</button>
+        </div>
+        <dl class="hero-stats" id="hero-stats" aria-label="Estadísticas de Planazo">
+          <div><dt>Planes</dt><dd id="stat-events">—</dd></div>
+          <div><dt>Ciudades</dt><dd id="stat-cities">—</dd></div>
+          <div><dt>Reservas</dt><dd id="stat-bookings">—</dd></div>
+        </dl>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="sun"></div>
+        <div class="ring"></div>
+        <div class="blob blob-one"></div>
+        <div class="blob blob-two"></div>
+        <div class="ticket ticket-back">★</div>
+        <div class="ticket ticket-front">
+          <span>ENTRADA · PLANAZO</span>
+          <strong>VIVE<br>MÁS</strong>
+          <small>PLANAZO · 2026</small>
+        </div>
+        <div class="sparkle sparkle-one">✦</div>
+        <div class="sparkle sparkle-two">✦</div>
+        <p class="hero-caption">La vida<br><strong>se disfruta</strong><br>en directo.</p>
+      </div>
+    </section>
+
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-track">
+        <span>CONCIERTOS ✦ TEATRO ✦ CINE ✦ MADRID ✦ BARCELONA ✦ VALENCIA ✦ </span>
+        <span>CONCIERTOS ✦ TEATRO ✦ CINE ✦ MADRID ✦ BARCELONA ✦ VALENCIA ✦ </span>
+      </div>
+    </div>
+
+    <section id="explorar" class="section explore-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Descubre tu próximo plan</p>
+          <h2>Todo lo que te apetece,<br><span>en un solo lugar.</span></h2>
+        </div>
+        <span class="result-count" id="result-count" aria-live="polite"></span>
+      </div>
+
+      <form class="filters" id="filters" autocomplete="off">
+        <label class="search-field">
+          <span aria-hidden="true">⌕</span>
+          <input id="search" type="search" placeholder="Artista, evento o lugar" aria-label="Buscar eventos">
+        </label>
+        <label class="select-field">
+          <span>Tipo</span>
+          <select id="type" aria-label="Tipo de evento">
+            <option>Todos</option><option>Concierto</option><option>Teatro</option><option>Cine</option>
+          </select>
+        </label>
+        <label class="select-field">
+          <span>Ciudad</span>
+          <select id="city" aria-label="Ciudad">
+            <option>Todas</option><option>Madrid</option><option>Barcelona</option><option>Valencia</option>
+          </select>
+        </label>
+        <label class="select-field">
+          <span>Ordenar</span>
+          <select id="sort" aria-label="Ordenar resultados">
+            <option value="date">Fecha</option>
+            <option value="price-asc">Precio: menor a mayor</option>
+            <option value="price-desc">Precio: mayor a menor</option>
+            <option value="title">Título A–Z</option>
+          </select>
+        </label>
+        <label class="switch" title="Mostrar solo eventos destacados">
+          <input id="only-featured" type="checkbox"><span class="switch-track"></span> Destacados
+        </label>
+        <button class="btn btn-primary" type="submit">Buscar <span>↗</span></button>
+        <button class="btn btn-plain" id="clear-filters" type="button">Limpiar</button>
+      </form>
+
+      <div class="active-filters" id="active-filters"></div>
+      <div id="event-grid" class="event-grid" aria-live="polite">
+        <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+      </div>
+    </section>
+
+    <section id="favoritos" class="section favorites-section" hidden>
+      <div class="section-heading">
+        <div><p class="eyebrow">Tu selección</p><h2>Tus <span>favoritos.</span></h2></div>
+        <span class="result-count" id="favorites-count"></span>
+      </div>
+      <div id="favorites-grid" class="mini-grid"></div>
+    </section>
+
+    <section id="reservas" class="section bookings-section" hidden>
+      <div class="section-heading">
+        <div><p class="eyebrow">Tu cuenta</p><h2>Mis <span>reservas.</span></h2></div>
+        <span class="result-count" id="bookings-count"></span>
+      </div>
+      <div id="bookings-list" class="booking-list"></div>
+    </section>
+
+    <section id="como-funciona" class="section steps-section">
+      <p class="eyebrow">Así de fácil</p>
+      <h2>Del sofá al planazo<br><span>en tres pasos.</span></h2>
+      <div class="steps">
+        <article><b>01</b><div class="step-icon">⌕</div><h3>Encuentra tu plan</h3><p>Explora experiencias y descubre algo que te haga vibrar.</p></article>
+        <article><b>02</b><div class="step-icon">♡</div><h3>Elige tus entradas</h3><p>Guarda tus favoritos y selecciona cuántas entradas quieres.</p></article>
+        <article><b>03</b><div class="step-icon">↗</div><h3>Disfruta el momento</h3><p>Confirma tu reserva al instante y prepárate para vivirlo.</p></article>
+      </div>
+    </section>
+
+    <section id="admin" class="section admin-section" hidden>
+      <div class="admin-card">
+        <div class="admin-head">
+          <div><p class="eyebrow">Panel interno</p><h2>Administración</h2></div>
+          <div class="admin-tabs" role="tablist">
+            <button class="admin-tab active" data-tab="events" type="button" role="tab">Eventos</button>
+            <button class="admin-tab" data-tab="users" id="tab-users" type="button" role="tab" hidden>Usuarios</button>
+          </div>
+        </div>
+        <div id="admin-events" class="admin-panel">
+          <div class="admin-toolbar"><p>Gestiona el catálogo de planes.</p><button class="btn btn-primary btn-sm" id="new-event" type="button">+ Nuevo evento</button></div>
+          <div class="table-wrap"><table class="admin-table">
+            <thead><tr><th>Evento</th><th>Tipo</th><th>Ciudad</th><th>Fecha</th><th>Precio</th><th>Acciones</th></tr></thead>
+            <tbody id="admin-events-body"></tbody>
+          </table></div>
+        </div>
+        <div id="admin-users" class="admin-panel" hidden>
+          <div class="admin-toolbar"><p>Cambia los roles de los usuarios registrados.</p></div>
+          <div class="table-wrap"><table class="admin-table">
+            <thead><tr><th>ID</th><th>Email</th><th>Rol</th><th>Alta</th></tr></thead>
+            <tbody id="admin-users-body"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="newsletter" id="newsletter">
+      <div><p class="eyebrow">No te lo pierdas</p><h2>El próximo planazo,<br><span>en tu correo.</span></h2></div>
+      <form id="newsletter-form">
+        <input type="email" required placeholder="tu@email.com" aria-label="Tu correo electrónico">
+        <button class="btn btn-dark" type="submit">Avisarme <span>↗</span></button>
+      </form>
+    </section>
+  </main>
+
+  <footer id="ayuda">
+    <div class="footer-top">
+      <div><div class="brand"><span class="brand-mark">✦</span> planazo</div><p>Menos pantalla. Más momentos.</p></div>
+      <nav aria-label="Enlaces del pie de página">
+        <a href="#explorar">Explorar</a><a href="#favoritos">Favoritos</a><a href="#reservas">Mis reservas</a><a href="#como-funciona">Cómo funciona</a>
+      </nav>
+      <div class="footer-help"><strong>¿Necesitas ayuda?</strong><a href="mailto:hola@planazo.local">hola@planazo.local</a></div>
+    </div>
+    <div class="footer-bottom"><small>© 2026 Planazo · Hecho para disfrutar en directo</small><small>FastAPI · React · Spring Boot</small></div>
+  </footer>
+
+  <button class="back-to-top" id="back-to-top" type="button" aria-label="Volver arriba">↑</button>
+  <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+  <dialog id="auth-dialog" class="dialog auth-dialog">
+    <button class="dialog-close" type="button" data-close aria-label="Cerrar">×</button>
+    <p class="eyebrow">Tu cuenta Planazo</p>
+    <h2 id="auth-title">Vuelve a tus planes.</h2>
+    <div class="oauth-buttons">
+      <a class="btn btn-oauth" href="/api/auth/oauth/github"><span>⌥</span> Continuar con GitHub</a>
+      <a class="btn btn-oauth" href="/api/auth/oauth/google"><span>G</span> Continuar con Google</a>
+    </div>
+    <div class="divider"><span>o con tu email</span></div>
+    <form id="auth-form">
+      <label>Email<input name="email" type="email" required placeholder="tu@email.com" autocomplete="email"></label>
+      <label>Contraseña<span class="password-wrap"><input name="password" type="password" required minlength="6" placeholder="Mínimo 6 caracteres" autocomplete="current-password"><button type="button" id="toggle-password" aria-label="Mostrar contraseña">◉</button></span></label>
+      <button class="btn btn-primary btn-block" type="submit" id="auth-submit">Entrar <span>↗</span></button>
+    </form>
+    <button class="text-button" id="auth-toggle" type="button">¿No tienes cuenta? Regístrate</button>
+    <p class="dialog-message" id="auth-message" role="status"></p>
+  </dialog>
+
+  <dialog id="event-dialog" class="dialog event-dialog">
+    <button class="dialog-close" type="button" data-close aria-label="Cerrar">×</button>
+    <div id="event-detail"></div>
+  </dialog>
+
+  <dialog id="booking-dialog" class="dialog booking-dialog">
+    <button class="dialog-close" type="button" data-close aria-label="Cerrar">×</button>
+    <p class="eyebrow">Alquilar entradas</p>
+    <h2 id="booking-title">Tu planazo</h2>
+    <p class="booking-subtitle" id="booking-subtitle"></p>
+    <form id="booking-form">
+      <label>Cantidad
+        <select id="booking-quantity">
+          <option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option>
+          <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+        </select>
+      </label>
+      <div class="price-summary"><span>Precio por entrada</span><b id="booking-unit">—</b><span>Total</span><strong id="booking-total">—</strong></div>
+      <button class="btn btn-primary btn-block" type="submit">Confirmar alquiler <span>↗</span></button>
+    </form>
+  </dialog>
+
+  <dialog id="editor-dialog" class="dialog editor-dialog">
+    <button class="dialog-close" type="button" data-close aria-label="Cerrar">×</button>
+    <p class="eyebrow">Catálogo</p>
+    <h2 id="editor-title">Nuevo evento</h2>
+    <form id="editor-form" class="editor-form">
+      <input type="hidden" id="editor-id">
+      <label>Título<input name="title" required maxlength="180" placeholder="Nombre del evento"></label>
+      <div class="form-row">
+        <label>Tipo<select name="type"><option>Concierto</option><option>Teatro</option><option>Cine</option></select></label>
+        <label>Ciudad<select name="city"><option>Madrid</option><option>Barcelona</option><option>Valencia</option></select></label>
+      </div>
+      <label>Recinto<input name="venue" required maxlength="180" placeholder="Lugar del evento"></label>
+      <div class="form-row">
+        <label>Fecha<input name="date" type="date" required></label>
+        <label>Hora<input name="time" type="time" required></label>
+      </div>
+      <div class="form-row">
+        <label>Precio (€)<input name="price" type="number" min="0" required></label>
+        <label>Visual<select name="image"><option value="concert">Concierto</option><option value="theatre">Teatro</option><option value="cinema">Cine</option></select></label>
+      </div>
+      <label>Color de acento<input name="accent" type="color" value="#ffb86b"></label>
+      <label class="switch"><input name="featured" type="checkbox"><span class="switch-track"></span> Destacado</label>
+      <button class="btn btn-primary btn-block" type="submit">Guardar evento <span>↗</span></button>
+    </form>
+  </dialog>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>

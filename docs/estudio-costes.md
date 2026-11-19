@@ -1,6 +1,6 @@
 # Estudio comparativo de coste de explotación
 
-**Aplicación:** Planazo (FastAPI + React, autenticación JWT con refresh, GitHub OAuth, roles y reservas).
+**Aplicación:** Planazo (Spring Boot, frontend estático servido por la propia app, autenticación JWT con refresh, OAuth de GitHub/Google, roles, favoritos y reservas).
 **Fecha de consulta de precios:** 19 de noviembre de 2026.
 **Moneda:** USD/mes. Regiones europeas cuando existen (Render Frankfurt, AWS eu-central-1, Azure West Europe, GCP europe-west1).
 
@@ -14,23 +14,23 @@ Para que las cifras sean comparables se estima una **explotación académica/dem
 - Se excluyen créditos promocionales de alta categoría y se indican aparte los periodos de prueba.
 - Los importes son **orientativos**; antes de contratar hay que usar las calculadoras oficiales.
 
-> Nota importante para esta app: el código usa SQLite por defecto. En Render/GCP/AWS/Azure el sistema de archivos efímero pierde la base de datos al reiniciar. Para una explotación real hay que migrar a PostgreSQL gestionado o montar un disco persistente; ambos casos se reflejan en la tabla.
+> Nota importante para esta app: el código usa H2 en modo archivo por defecto (`./data/planazo`). En Render/GCP/AWS/Azure el sistema de archivos efímero pierde la base de datos al reiniciar. Para una explotación real hay que migrar a PostgreSQL gestionado o montar un disco persistente en `/app/data`; ambos casos se reflejan en la tabla.
 
 ## 2. Tabla comparativa
 
 | Proveedor | Arquitectura mínima recomendada | Coste mensual aprox. (demo) | Coste mensual aprox. (producción ligera) | Complejidad operativa |
 |---|---|---:|---:|---|
-| **Render** | Web Service Hobby (Docker, 512 MB) + SQLite efímero. Blueprint `render.yaml`. | **0 $** | **7,25 $** (0,5 CPU/512 MB = 7 $ + 1 GB SSD = 0,25 $). Postgres gestionado plan pequeño ≈ 6-19 $ adicionales. | **Muy baja**: deploy desde Git, TLS y CDN incluidos. |
+| **Render** | Web Service Hobby (Docker, 512 MB) + H2 efímero. Blueprint `render.yaml`. | **0 $** | **7,25 $** (0,5 CPU/512 MB = 7 $ + 1 GB SSD = 0,25 $). Postgres gestionado plan pequeño ≈ 6-19 $ adicionales. | **Muy baja**: deploy desde Git, TLS y CDN incluidos. |
 | **AWS** | Elastic Beanstalk Standard, 1 × t3.micro (8 GB EBS + IP pública). Opcional ALB + RDS. | **≈ 12 $** (el Free Tier de 6 meses lo cubre con créditos). ≈ 29 $ con ALB según ejemplo oficial. | **≈ 25-45 $** añadiendo RDS db.t3.micro (≈ 12-15 $) y ALB (≈ 16-18 $). | **Media-alta**: VPC, ALB, RDS, IAM, CloudWatch. |
 | **MS Azure** | App Service F1 (gratis, 60 CPU-min/día, 1 GB, sin SLA) o B1 Linux (1 vCPU/1,75 GB). PostgreSQL Flexible Server B1ms. | **0 $** con F1 (solo desarrollo) / **≈ 13 $** con B1 Linux. | **≈ 26-30 $** (B1 Linux ≈ 13,14 $ + PostgreSQL B1ms ≈ 13-16 $). El plan B1ms es burstable y no factura cuando está parado. | **Media**: integración con GitHub Actions y Azure AD; bien documentado. |
-| **Google Cloud** | Cloud Run (facturación por petición, 1 vCPU/512 MiB) + SQLite en contenedor. O Cloud SQL PostgreSQL. | **0-3 $**: 2 M peticiones, 180.000 vCPU-s y 360.000 GiB-s gratis/mes. | **≈ 8-18 $** con Cloud SQL PostgreSQL compartido (≈ 8-15 $); el ejemplo oficial de 10 M peticiones con 1 vCPU/512 MiB es ≈ 13,69 $. | **Media**: escalado a cero y sin servidores, pero hay que configurar Cloud SQL/Artifact Registry. |
+| **Google Cloud** | Cloud Run (facturación por petición, 1 vCPU/512 MiB) + H2 en contenedor. O Cloud SQL PostgreSQL. | **0-3 $**: 2 M peticiones, 180.000 vCPU-s y 360.000 GiB-s gratis/mes. | **≈ 8-18 $** con Cloud SQL PostgreSQL compartido (≈ 8-15 $); el ejemplo oficial de 10 M peticiones con 1 vCPU/512 MiB es ≈ 13,69 $. | **Media**: escalado a cero y sin servidores, pero hay que configurar Cloud SQL/Artifact Registry. |
 
 ## 3. Desglose por proveedor
 
 ### Render
 El plan *Hobby* cuesta 0 $/mes más compute. El Web Service **Free** tiene 512 MB de RAM y 5 GB de banda incluidos; se suspende tras un periodo de inactividad y tarda en reactivarse. El siguiente escalón (menos de 1 CPU, 512 MB) cuesta **7 $/mes**. Los discos SSD persistentes cuestan **0,25 $/GB/mes** y Postgres empieza en 0 $ (free, 256 MB, 100 conexiones) o 6 $/mes (menos de 1 CPU, 256 MB).
 
-**Ventajas para esta entrega:** un solo `render.yaml` crea el servicio, el build compila React y ejecuta Uvicorn, y la URL pública sale lista con TLS. Es la opción más barata y rápida para el despliegue solicitado.
+**Ventajas para esta entrega:** un solo `render.yaml` crea el servicio, el Dockerfile compila el JAR con Maven y lo ejecuta con Java 25, y la URL pública sale lista con TLS. Es la opción más barata y rápida para el despliegue solicitado.
 
 **Riesgo:** sin disco, usuarios y reservas se reinician con cada deploy. Mitigación: disco persistente (1 GB ≈ 0,25 $/mes) o Postgres.
 
@@ -45,7 +45,7 @@ App Service ofrece un plan **F1 gratuito** (60 CPU-minutos/día, 1 GB, sin SLA, 
 **Ventaja:** buena integración con GitHub Actions y Entra ID. **Inconveniente:** las tarifas exactas varían mucho por región y los SKUs "burstable" pueden tener créditos de CPU limitados.
 
 ### Google Cloud
-Cloud Run con facturación por petición incluye cada mes 2 M peticiones, 180.000 vCPU-segundos y 360.000 GiB-segundos gratis; fuera de ahí, 1 vCPU cuesta 0,000024 $/s activo y 1 GiB 0,0000025 $/s (europe-west1, Tarifa 1). El ejemplo oficial con 10 M peticiones, 1 vCPU y 512 MiB cuesta **13,69 $/mes**. Cloud SQL PostgreSQL compartido añade aproximadamente 8-15 $/mes, mientras que mantener SQLite dentro del contenedor sale gratis pero no persiste.
+Cloud Run con facturación por petición incluye cada mes 2 M peticiones, 180.000 vCPU-segundos y 360.000 GiB-segundos gratis; fuera de ahí, 1 vCPU cuesta 0,000024 $/s activo y 1 GiB 0,0000025 $/s (europe-west1, Tarifa 1). El ejemplo oficial con 10 M peticiones, 1 vCPU y 512 MiB cuesta **13,69 $/mes**. Cloud SQL PostgreSQL compartido añade aproximadamente 8-15 $/mes, mientras que mantener H2 dentro del contenedor sale gratis pero no persiste.
 
 **Ventaja:** escalado a cero: si no hay tráfico, compute ≈ 0. **Inconveniente:** cold starts y coste fijo de Cloud SQL si se quiere persistencia.
 

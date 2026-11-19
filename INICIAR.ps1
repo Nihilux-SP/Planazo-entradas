@@ -3,7 +3,7 @@ param([switch]$SoloConfigurar)
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Definition
 Set-Location $root
-$envFile = Join-Path $root "backend\.env.local"
+$envFile = Join-Path $root ".env.local"
 
 function ConvertFrom-SecureStringText {
     param([System.Security.SecureString]$Secure)
@@ -22,9 +22,9 @@ function New-JwtSecret {
 }
 
 if (-not (Test-Path $envFile)) {
-    Write-Host "=== Configuracion inicial de Planazo ===" -ForegroundColor Cyan
+    Write-Host "=== Configuracion inicial de Planazo (Spring Boot) ===" -ForegroundColor Cyan
     Write-Host "Crea una OAuth App en https://github.com/settings/developers"
-    Write-Host("Authorization callback URL: http://localhost:8000/api/auth/oauth/github/callback")
+    Write-Host("Authorization callback URL: http://localhost:8080/api/auth/oauth/github/callback")
     Write-Host ""
     $clientId = (Read-Host "GITHUB_CLIENT_ID").Trim()
     $clientSecret = (ConvertFrom-SecureStringText (Read-Host "GITHUB_CLIENT_SECRET" -AsSecureString)).Trim()
@@ -39,9 +39,8 @@ if (-not (Test-Path $envFile)) {
         "GITHUB_CLIENT_ID=$clientId",
         "GITHUB_CLIENT_SECRET=$clientSecret",
         "JWT_SECRET=$(New-JwtSecret)",
-        "OAUTH_REDIRECT_URI=http://localhost:8000/api/auth/oauth/{provider}/callback",
-        "FRONTEND_URI=http://localhost:8080/",
-        "CORS_ORIGINS=http://localhost:8080"
+        "OAUTH_REDIRECT_URI=http://localhost:8080/api/auth/oauth/{provider}/callback",
+        "FRONTEND_URI=http://localhost:8080/"
     )
     Set-Content -Path $envFile -Value $lines -Encoding UTF8
     Write-Host "Configuracion guardada en $envFile" -ForegroundColor Green
@@ -65,17 +64,12 @@ if ($SoloConfigurar) {
     return
 }
 
-$backendExe = Join-Path $root "backend\.venv\Scripts\uvicorn.exe"
-if (-not (Test-Path $backendExe)) {
-    throw "No se encontro el entorno virtual: $backendExe"
+$mvn = Get-Command mvn -ErrorAction SilentlyContinue
+if (-not $mvn) {
+    throw "No se encontro Maven. Instalalo o usa INICIAR.bat con Maven en el PATH."
 }
-$frontendDir = Join-Path $root "frontend"
 
-Write-Host "Arrancando API en http://localhost:8000 ..." -ForegroundColor Cyan
-Start-Process -FilePath "cmd.exe" -ArgumentList "/k `"$backendExe`" app.main:app --app-dir backend --reload --port 8000" -WorkingDirectory $root
-
-Write-Host "Arrancando frontend en http://localhost:8080 ..." -ForegroundColor Cyan
-Start-Process -FilePath "cmd.exe" -ArgumentList "/k npm run dev" -WorkingDirectory $frontendDir
-
+Write-Host "Arrancando Spring Boot en http://localhost:8080 ..." -ForegroundColor Cyan
+Write-Host "API docs: http://localhost:8080/api/health" -ForegroundColor Green
 Start-Process "http://localhost:8080"
-Write-Host "Listo. API docs: http://localhost:8000/docs" -ForegroundColor Green
+& $mvn.Source spring-boot:run

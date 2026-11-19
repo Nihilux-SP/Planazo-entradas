@@ -1,24 +1,16 @@
-# --- 1. Construir el frontend React ---
-FROM node:20-alpine AS frontend
-WORKDIR /app/frontend
-COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci
-COPY frontend/ ./
-ARG VITE_API_URL=""
-ENV VITE_API_URL=$VITE_API_URL
-RUN npm run build
+# --- 1. Construir la aplicación Spring Boot ---
+FROM maven:3.9-eclipse-temurin-25 AS build
+WORKDIR /build
+COPY pom.xml ./
+COPY src ./src
+RUN mvn -q -DskipTests package
 
-# --- 2. API FastAPI + bundle estático ---
-FROM python:3.11-slim
+# --- 2. Imagen de ejecución: Java + frontend estático + API en el mismo puerto ---
+FROM eclipse-temurin:25-jre
 WORKDIR /app
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PORT=8000 \
-    DATABASE_PATH=/app/data/planazo.sqlite3
-COPY backend/requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
-COPY backend/ ./
-COPY --from=frontend /app/frontend/dist ./app/static
+COPY --from=build /build/target/entradas-app-0.0.1-SNAPSHOT.jar ./app.jar
 RUN mkdir -p /app/data
-EXPOSE 8000
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
+ENV PORT=8080 \
+    SPRING_DATASOURCE_URL='jdbc:h2:file:/app/data/planazo;MODE=PostgreSQL;AUTO_SERVER=TRUE'
+EXPOSE 8080
+CMD ["sh", "-c", "java -jar app.jar --server.port=${PORT}"]
