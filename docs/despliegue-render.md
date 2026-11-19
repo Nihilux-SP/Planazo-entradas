@@ -1,24 +1,24 @@
 # Despliegue en Render.com
 
-Este repositorio incluye `render.yaml` (Blueprint) y `Dockerfile`. El build compila el frontend React con Vite y el contenedor final sirve el bundle estático con FastAPI en el mismo servicio, de modo que las llamadas a `/api` son del mismo origen.
+El repositorio incluye `render.yaml` (Blueprint) y `Dockerfile`. El build compila el frontend React con Vite y el contenedor final sirve el bundle estático con FastAPI en el mismo servicio, de modo que las llamadas a `/api` son del mismo origen.
 
 ## URL publicada
 
-> **Pendiente de asignar por Render.** Se actualizará en este archivo y en el `README.md` en cuanto el servicio esté activo.
+> **https://planazo-o7us.onrender.com**
 
 ## Pasos
 
 1. Abrir <https://render.com/deploy?repo=https://github.com/Nihilux-SP/Planazo-entradas>.
 2. Render detecta `render.yaml` en la raíz. Rellenar `GITHUB_CLIENT_ID` y `GITHUB_CLIENT_SECRET` de la OAuth App de GitHub. `JWT_SECRET` se genera automáticamente.
-3. Pulsar **Apply**. El servicio `planazo` queda en `https://planazo-<id>.onrender.com`.
-4. En la OAuth App de GitHub (<https://github.com/settings/developers>) cambiar la **Authorization callback URL** a:
+3. Pulsar **Deploy Blueprint**. El servicio `planazo` queda en `https://planazo-o7us.onrender.com` (región Frankfurt, plan Free).
+4. En la OAuth App de GitHub (<https://github.com/settings/developers>), la **Homepage URL** es `https://planazo-o7us.onrender.com/` y la **Authorization callback URL** es:
    ```
-   https://planazo-<id>.onrender.com/api/auth/oauth/github/callback
+   https://planazo-o7us.onrender.com/api/auth/oauth/github/callback
    ```
-   y la **Homepage URL** a `https://planazo-<id>.onrender.com`.
+   También se conserva el callback local `http://localhost:8000/api/auth/oauth/github/callback` para desarrollo.
 5. Comprobar:
-   - `https://planazo-<id>.onrender.com/api/health` → `{"status":"ok","service":"planazo-api"}`
-   - `https://planazo-<id>.onrender.com/docs` → documentación de la API.
+   - `https://planazo-o7us.onrender.com/api/health` → `{"status":"ok","service":"planazo-api"}`
+   - `https://planazo-o7us.onrender.com/docs` → documentación de la API.
    - Registro con correo, login GitHub y reservas desde la raíz del sitio.
 
 ## Configuración automática
